@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiş — En Yakın Kahveciler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --espresso:#241610;
+    --espresso-deep:#160d09;
+    --paper:#ede6d6;
+    --paper-dim:#ddd2b4;
+    --crema:#c89b3c;
+    --crema-bright:#e0b354;
+    --pine:#4a7c6f;
+    --rust:#a94438;
+    --ink:#241610;
+    --ink-soft:#5a4b3e;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, #3a2417 0%, var(--espresso) 45%, var(--espresso-deep) 100%);
+    color:var(--paper);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding:0 0 80px;
+  }
+  ::selection{background:var(--crema); color:var(--espresso-deep);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    max-width:760px;
+    margin:0 auto;
+    padding:64px 24px 40px;
+    text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--crema-bright);
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:900;
+    font-size:clamp(2.4rem, 6vw, 4rem);
+    line-height:1.02;
+    margin:0 0 18px;
+    letter-spacing:-.01em;
+  }
+  h1 em{
+    font-style:italic;
+    font-weight:400;
+    color:var(--crema-bright);
+  }
+  .sub{
+    color:var(--paper-dim);
+    font-size:16px;
+    max-width:480px;
+    margin:0 auto 34px;
+    line-height:1.55;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    align-items:center;
+  }
+  button, .search-row input{
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+  }
+  .btn-primary{
+    background:var(--crema);
+    color:var(--espresso-deep);
+    border:none;
+    padding:13px 26px;
+    border-radius:3px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn-primary:hover{background:var(--crema-bright); transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0);}
+  .btn-primary:focus-visible, .btn-ghost:focus-visible, .search-row input:focus-visible, select:focus-visible{
+    outline:2px solid var(--crema-bright);
+    outline-offset:2px;
+  }
+  .or{
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+  }
+  .search-row{
+    display:flex;
+    gap:0;
+    border:1px solid #5a4230;
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .search-row input{
+    background:var(--espresso-deep);
+    border:none;
+    color:var(--paper);
+    padding:12px 14px;
+    width:210px;
+  }
+  .search-row input::placeholder{color:#8a7561;}
+  .search-row input:focus{outline:none;}
+  .btn-ghost{
+    background:transparent;
+    border:none;
+    color:var(--paper);
+    padding:12px 16px;
+    cursor:pointer;
+    border-left:1px solid #5a4230;
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.06);}
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    align-items:center;
+    margin-top:18px;
+  }
+  .chip-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#8a7561;
+    margin-right:2px;
+  }
+  .chip{
+    background:transparent;
+    border:1px solid #5a4230;
+    color:var(--paper-dim);
+    font-family:'Work Sans', sans-serif;
+    font-size:13px;
+    padding:6px 13px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .chip:hover{background:rgba(200,155,60,.12); border-color:var(--crema);}
+  .chip.active{background:var(--crema); border-color:var(--crema); color:var(--espresso-deep); font-weight:600;}
+  .chip:focus-visible{outline:2px solid var(--crema-bright); outline-offset:2px;}
+
+  .btn-link{
+    background:none;
+    border:none;
+    color:#8a7561;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    padding:4px;
+  }
+  .btn-link:hover{color:var(--crema-bright);}
+
+  .status-line{
+    margin-top:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--crema-bright);
+    min-height:18px;
+  }
+  .status-line.err{color:#e08a7e;}
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{
+    max-width:640px;
+    margin:0 auto;
+    padding:0 24px 8px;
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .toolbar.show{display:flex;}
+  .toolbar-right{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .toolbar .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--paper-dim);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+  }
+  select{
+    background:var(--espresso-deep);
+    color:var(--paper);
+    border:1px solid #5a4230;
+    padding:8px 10px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+
+  @media (max-width: 480px){
+    .hero{padding:44px 16px 28px;}
+    h1{font-size:clamp(2rem, 9vw, 2.6rem);}
+    .sub{font-size:14px;}
+    .search-row input{width:150px;}
+    .toolbar{padding:0 16px 8px; flex-direction:column; align-items:flex-start;}
+    .toolbar-right{width:100%;}
+    .receipt-wrap{padding:0 12px;}
+    .cafe-top{flex-direction:column; align-items:flex-start; gap:2px;}
+    .price-row{flex-wrap:wrap;}
+    .directions-link{margin-left:0;}
+  }
+
+  /* ---------- RECEIPT ---------- */
+  .receipt-wrap{
+    max-width:640px;
+    margin:24px auto 0;
+    padding:0 24px;
+  }
+  .receipt{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:2px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+    position:relative;
+  }
+  .receipt::before, .receipt::after{
+    content:"";
+    display:block;
+    height:14px;
+    background:
+      radial-gradient(circle at 10px 7px, transparent 6px, var(--espresso) 6.5px) repeat-x;
+    background-size:20px 14px;
+  }
+  .receipt::before{background-position:0 -7px;}
+  .receipt::after{background-position:0 7px;}
+  .receipt-body{padding:8px 26px 22px;}
+  .r-title{
+    font-family:'IBM Plex Mono', monospace;
+    text-align:center;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:14px 0 10px;
+    border-bottom:1px dashed #b8ab8c;
+  }
+  .cafe-row{
+    padding:16px 0;
+    border-bottom:1px dashed #b8ab8c;
+  }
+  .cafe-row:last-child{border-bottom:none;}
+  .cafe-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+  }
+  .cafe-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:18px;
+    line-height:1.25;
+  }
+  .cafe-dist{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    font-weight:600;
+    color:var(--pine);
+    white-space:nowrap;
+  }
+  .cafe-meta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .price-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+  }
+  .price-row label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+  }
+  .badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:2px 7px;
+    border-radius:999px;
+    vertical-align:middle;
+    margin-left:6px;
+  }
+  .badge-open{background:rgba(74,124,111,.18); color:var(--pine); border:1px solid var(--pine);}
+  .badge-closed{background:rgba(169,68,56,.15); color:var(--rust); border:1px solid var(--rust);}
+  .badge-hours{background:rgba(90,75,62,.12); color:var(--ink-soft); border:1px solid #b8ab8c; cursor:help;}
+  .directions-link{
+    margin-left:auto;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--pine);
+    text-decoration:none;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .directions-link:hover{text-decoration:underline;}
+  .price-tag{
+    display:flex;
+    gap:4px;
+  }
+  .price-tag button{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:1px solid #b8ab8c;
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .price-tag button.active{
+    background:var(--crema);
+    border-color:var(--crema);
+    color:var(--espresso-deep);
+    font-weight:600;
+  }
+  .receipt-footer{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    padding-top:14px;
+    letter-spacing:.05em;
+  }
+
+  .empty, .loading{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    line-height:1.6;
+  }
+  .retry-btn{
+    margin-top:14px;
+    border:1px solid #b8ab8c;
+    border-radius:3px;
+    color:var(--ink);
+  }
+
+  footer.note{
+    max-width:640px;
+    margin:30px auto 0;
+    padding:0 24px;
+    font-size:12px;
+    color:#8a7561;
+    line-height:1.6;
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .btn-primary{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">istanbul'da yakınında ne var</div>
+  <h1>En yakın <em>fincan</em>ı<br>bul, fiyatı sen etiketle.</h1>
+  <p class="sub">Konumunu paylaş ya da bir semt seç, çevrendeki kahvecileri mesafeye göre sıralayalım. Fiyat bilgisi genel veritabanlarında yok — gördüğün yerleri kendi bildiğin fiyat seviyesiyle işaretleyip listeyi ona göre de sıralayabilirsin.</p>
+
+  <div class="controls">
+    <button class="btn-primary" id="geoBtn">📍 Konumumu kullan</button>
+    <span class="or">veya</span>
+    <div class="search-row">
+      <input type="text" id="cityInput" placeholder="semt yaz, örn. Kadıköy" value="İstanbul, Beyoğlu">
+      <button class="btn-ghost" id="citySearchBtn">Ara</button>
+    </div>
+  </div>
+
+  <div class="chips" id="chips">
+    <span class="chip-label">hızlı semtler:</span>
+    <button class="chip" data-semt="Kadıköy, İstanbul">Kadıköy</button>
+    <button class="chip" data-semt="Beşiktaş, İstanbul">Beşiktaş</button>
+    <button class="chip" data-semt="Beyoğlu, İstanbul">Beyoğlu</button>
+    <button class="chip" data-semt="Şişli, İstanbul">Şişli</button>
+    <button class="chip" data-semt="Üsküdar, İstanbul">Üsküdar</button>
+    <button class="chip" data-semt="Bakırköy, İstanbul">Bakırköy</button>
+  </div>
+
+  <div class="status-line" id="statusLine"></div>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <span class="label" id="resultCount"></span>
+  <div class="toolbar-right">
+    <span class="label">Yarıçap:</span>
+    <select id="radiusSelect">
+      <option value="500">500 m</option>
+      <option value="1000">1 km</option>
+      <option value="1500" selected>1.5 km</option>
+      <option value="2000">2 km</option>
+      <option value="3000">3 km</option>
+    </select>
+    <span class="label">Sırala:</span>
+    <select id="sortSelect">
+      <option value="dist">Mesafe (yakından)</option>
+      <option value="price">Fiyat (ucuzdan) — işaretlenenler önce</option>
+      <option value="name">İsim (A-Z)</option>
+    </select>
+    <button class="btn-link" id="clearMarksBtn">fiyat işaretlerini temizle</button>
+  </div>
+</div>
+
+<div class="receipt-wrap">
+  <div class="receipt">
+    <div class="receipt-body">
+      <div class="r-title">✦ kahveci fişi ✦</div>
+      <div id="listArea">
+        <div class="empty">Henüz bir konum seçmedin. Yukarıdan başla ☝</div>
+      </div>
+      <div class="receipt-footer" id="footerNote" style="display:none">— fiş burada bitiyor —</div>
+    </div>
+  </div>
+</div>
+
+<footer class="note">
+  Yer verileri Google Places'ten (kendi API anahtarınla) alınır. Fiyat seviyeleri (₺ / ₺₺ / ₺₺₺) bazı yerler için Google'dan otomatik gelir, gelmeyenler için senin işaretlemenle bu oturumda saklanır.
+</footer>
+
+<script>
+const listArea = document.getElementById('listArea');
+const statusLine = document.getElementById('statusLine');
+const toolbar = document.getElementById('toolbar');
+const resultCount = document.getElementById('resultCount');
+const footerNote = document.getElementById('footerNote');
+const sortSelect = document.getElementById('sortSelect');
+
+let cafes = [];
+let priceMarks = {}; // id -> 1|2|3
+let currentRadius = 1500;
+let lastSearch = null; // {lat, lon, label}
+
+const ISTANBUL_SEMT = {
+  'Kadıköy, İstanbul':  [40.9905, 29.0234],
+  'Beşiktaş, İstanbul': [41.0430, 29.0089],
+  'Beyoğlu, İstanbul':  [41.0370, 28.9850],
+  'Şişli, İstanbul':    [41.0602, 28.9877],
+  'Üsküdar, İstanbul':  [41.0226, 29.0244],
+  'Bakırköy, İstanbul': [40.9819, 28.8772]
+};
+
+function haversine(lat1, lon1, lat2, lon2){
+  const R = 6371000;
+  const toRad = d => d * Math.PI/180;
+  const dLat = toRad(lat2-lat1);
+  const dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function fmtDist(m){
+  if(m < 1000) return Math.round(m) + ' m';
+  return (m/1000).toFixed(1) + ' km';
+}
+
+function setStatus(msg, isErr){
+  statusLine.textContent = msg;
+  statusLine.className = 'status-line' + (isErr ? ' err' : '');
+}
+
+const PROXY_BASE = '/.netlify/functions/places';
+
+async function geocodeCity(name){
+  let res;
+  try{
+    res = await fetch(PROXY_BASE + '?action=geocode&address=' + encodeURIComponent(name));
+  }catch(e){
+    throw new Error('fetch-failed');
+  }
+  if(!res.ok) throw new Error('http-' + res.status);
+  const data = await res.json();
+  if(data.status !== 'OK' || !data.results?.length) throw new Error('geocode-not-found');
+  const loc = data.results[0].geometry.location;
+  return { lat: loc.lat, lon: loc.lng, label: data.results[0].formatted_address };
+}
+
+// ---------- Google Places (sunucu tarafındaki proxy üzerinden, kullanıcı anahtar girmez) ----------
+function googleErrorMessage(e){
+  const m = e?.message || '';
+  if(m.startsWith('http-')) {
+    const code = m.replace('http-', '');
+    if(code === '500') return 'Sunucu hazır değil — site sahibinin Netlify\'da GOOGLE_PLACES_API_KEY ortam değişkenini eklemesi gerekiyor.';
+    if(code === '403') return 'İstek reddedildi (403) — sunucudaki anahtar için "Places API (New)" etkin mi ve faturalandırma açık mı kontrol edilmeli.';
+    if(code === '400') return 'Geçersiz istek (400).';
+    return 'HTTP hata kodu: ' + code;
+  }
+  if(m === 'fetch-failed') return 'Sunucudaki fonksiyona hiç ulaşılamadı (ağ engeli olabilir).';
+  return m || 'bilinmeyen hata';
+}
+
+const PRICE_LEVEL_MAP = {
+  PRICE_LEVEL_FREE: 1,
+  PRICE_LEVEL_INEXPENSIVE: 1,
+  PRICE_LEVEL_MODERATE: 2,
+  PRICE_LEVEL_EXPENSIVE: 3,
+  PRICE_LEVEL_VERY_EXPENSIVE: 3
+};
+
+async function fetchCafesGoogle(lat, lon, radius=currentRadius){
+  let res;
+  try{
+    const url = PROXY_BASE + `?action=nearby&lat=${lat}&lon=${lon}&radius=${radius}`;
+    res = await fetch(url);
+  }catch(e){
+    throw new Error('fetch-failed');
+  }
+
+  if(!res.ok){
+    let detail = '';
+    try{ const j = await res.json(); detail = j?.error || ''; }catch(_){}
+    console.error('Proxy error detail:', detail);
+    throw new Error('http-' + res.status);
+  }
+
+  const data = await res.json();
+  const places = data.places || [];
+  return places.map(p => ({
+    id: p.id,
+    name: p.displayName?.text || 'İsimsiz kahveci',
+    lat: p.location?.latitude,
+    lon: p.location?.longitude,
+    dist: haversine(lat, lon, p.location?.latitude, p.location?.longitude),
+    street: p.formattedAddress || '',
+    priceLevel: PRICE_LEVEL_MAP[p.priceLevel] ?? null,
+    openNow: typeof p.currentOpeningHours?.openNow === 'boolean' ? p.currentOpeningHours.openNow : null
+  })).filter(c => c.lat && c.lon);
+}
+
+
+function render(){
+  if(!cafes.length){
+    listArea.innerHTML = '<div class="empty">Yakında kahveci bulunamadı. Yarıçapı genişletmeyi dene ya da başka bir konum seç.</div>';
+    footerNote.style.display = 'none';
+    resultCount.textContent = '';
+    return;
+  }
+
+  let sorted = [...cafes];
+  const mode = sortSelect.value;
+  if(mode === 'dist'){
+    sorted.sort((a,b) => a.dist - b.dist);
+  } else if(mode === 'name'){
+    sorted.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+  } else if(mode === 'price'){
+    sorted.sort((a,b) => {
+      const pa = priceMarks[a.id] || 99;
+      const pb = priceMarks[b.id] || 99;
+      if(pa !== pb) return pa - pb;
+      return a.dist - b.dist;
+    });
+  }
+
+  resultCount.textContent = sorted.length + ' kahveci bulundu';
+  footerNote.style.display = 'block';
+
+  listArea.innerHTML = sorted.map(c => {
+    const mark = priceMarks[c.id] || 0;
+    const priceBtns = [1,2,3].map(lvl =>
+      `<button data-id="${c.id}" data-lvl="${lvl}" class="${mark===lvl?'active':''}" aria-label="${lvl} seviyesi fiyat işaretle">${'₺'.repeat(lvl)}</button>`
+    ).join('');
+    let hoursBadge = '';
+    if(c.openNow === true) hoursBadge = '<span class="badge badge-open">açık</span>';
+    else if(c.openNow === false) hoursBadge = '<span class="badge badge-closed">kapalı</span>';
+    else if(c.rawHours) hoursBadge = `<span class="badge badge-hours" title="${escapeHtml(c.rawHours)}">saatler var</span>`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lon}`;
+    return `
+      <div class="cafe-row">
+        <div class="cafe-top">
+          <div class="cafe-name">${escapeHtml(c.name)} ${hoursBadge}</div>
+          <div class="cafe-dist">${fmtDist(c.dist)}</div>
+        </div>
+        ${c.street ? `<div class="cafe-meta">${escapeHtml(c.street)}</div>` : ''}
+        <div class="price-row">
+          <label>fiyat seviyesi:</label>
+          <div class="price-tag">${priceBtns}</div>
+          <a class="directions-link" href="${mapsUrl}" target="_blank" rel="noopener">yol tarifi →</a>
+        </div>
+      </div>`;
+  }).join('');
+
+  listArea.querySelectorAll('.price-tag button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const lvl = parseInt(btn.dataset.lvl);
+      priceMarks[id] = priceMarks[id] === lvl ? 0 : lvl;
+      if(priceMarks[id] === 0) delete priceMarks[id];
+      render();
+    });
+  });
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function loadAround(lat, lon, label){
+  lastSearch = { lat, lon, label };
+
+  listArea.innerHTML = '<div class="loading">Çevredeki kahveciler taranıyor…</div>';
+  toolbar.classList.remove('show');
+  setStatus('Google Places sorgulanıyor…');
+
+  try{
+    const list = await fetchCafesGoogle(lat, lon);
+    cafes = list;
+    cafes.forEach(c => {
+      if(c.priceLevel != null && !(c.id in priceMarks)){
+        priceMarks[c.id] = Math.min(3, Math.max(1, c.priceLevel));
+      }
+    });
+    setStatus((label ? `📍 ${label} çevresi` : '📍 Konumun çevresi') + ` — ${fmtDist(currentRadius)} yarıçap · Google Places`);
+    toolbar.classList.add('show');
+    render();
+  }catch(e){
+    console.error('Google Places failed:', e);
+    setStatus('Google Places hatası: ' + googleErrorMessage(e), true);
+    listArea.innerHTML = '<div class="empty">Google Places\'ten veri alınamadı.<br><button class="btn-ghost retry-btn" id="retryBtn">↻ Tekrar dene</button></div>';
+    document.getElementById('retryBtn')?.addEventListener('click', () => {
+      if(lastSearch) loadAround(lastSearch.lat, lastSearch.lon, lastSearch.label);
+    });
+  }
+}
+
+document.getElementById('geoBtn').addEventListener('click', () => {
+  if(!navigator.geolocation){
+    setStatus('Tarayıcın konum servisini desteklemiyor.', true);
+    return;
+  }
+  if(!window.isSecureContext){
+    setStatus('Konum servisi sadece güvenli (https) bağlantılarda çalışır. Dosyayı yerelde açtıysan bu yüzden çalışmıyor olabilir — siteyi bir hosting servisine taşımanı öneririm.', true);
+    return;
+  }
+  setStatus('Konum isteniyor…');
+  navigator.geolocation.getCurrentPosition(
+    pos => loadAround(pos.coords.latitude, pos.coords.longitude),
+    err => {
+      let msg;
+      switch(err.code){
+        case err.PERMISSION_DENIED:
+          msg = 'Konuma izin verilmedi. Aşağıdan semt seçebilir ya da arayabilirsin.'; break;
+        case err.POSITION_UNAVAILABLE:
+          msg = 'Konum belirlenemedi. Aşağıdan semt seçebilirsin.'; break;
+        case err.TIMEOUT:
+          msg = 'Konum isteği zaman aşımına uğradı, tekrar dener misin?'; break;
+        default:
+          msg = 'Konum alınamadı.';
+      }
+      setStatus(msg, true);
+    },
+    { timeout: 10000 }
+  );
+});
+
+document.getElementById('citySearchBtn').addEventListener('click', doCitySearch);
+document.getElementById('cityInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') doCitySearch();
+});
+
+async function doCitySearch(){
+  const val = document.getElementById('cityInput').value.trim();
+  if(!val) return;
+  const known = ISTANBUL_SEMT[val];
+  if(known){
+    loadAround(known[0], known[1], val);
+    return;
+  }
+  setStatus('Konum aranıyor…');
+  try{
+    const loc = await geocodeCity(val);
+    loadAround(loc.lat, loc.lon, val);
+  }catch(e){
+    setStatus('Bu isimde bir yer bulamadım.', true);
+  }
+}
+
+sortSelect.addEventListener('change', render);
+
+document.getElementById('radiusSelect').addEventListener('change', (e) => {
+  currentRadius = parseInt(e.target.value);
+  if(lastSearch) loadAround(lastSearch.lat, lastSearch.lon, lastSearch.label);
+});
+
+document.getElementById('clearMarksBtn').addEventListener('click', () => {
+  priceMarks = {};
+  render();
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const semt = chip.dataset.semt;
+    document.getElementById('cityInput').value = semt;
+    const coords = ISTANBUL_SEMT[semt];
+    if(coords){
+      loadAround(coords[0], coords[1], semt);
+    }else{
+      doCitySearch();
+    }
+  });
+});
+
+// İstanbul için varsayılan başlangıç: Beyoğlu çevresi
+window.addEventListener('DOMContentLoaded', () => {
+  loadAround(41.0370, 28.9850, 'Beyoğlu, İstanbul');
+});
+</script>
+
+</body>
+</html>
