@@ -160,6 +160,31 @@
   .chip.active{background:var(--crema); border-color:var(--crema); color:var(--espresso-deep); font-weight:600;}
   .chip:focus-visible{outline:2px solid var(--crema-bright); outline-offset:2px;}
 
+  .subchips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+    align-items:center;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed #4a3626;
+  }
+  .chip-sub{
+    background:transparent;
+    border:1px solid #4a3626;
+    color:#b8a688;
+    font-family:'Work Sans', sans-serif;
+    font-size:12px;
+    padding:5px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .chip-sub:hover{background:rgba(200,155,60,.1); border-color:var(--crema-bright);}
+  .chip-sub.active{background:var(--pine); border-color:var(--pine); color:var(--paper); font-weight:600;}
+  .chip-sub:focus-visible{outline:2px solid var(--crema-bright); outline-offset:2px;}
+
   .btn-link{
     background:none;
     border:none;
@@ -395,7 +420,7 @@
 
 <div class="hero">
   <div class="eyebrow">istanbul'da</div>
-  <h1>En ucuz kahve nerede bilmiyorsan<br><em>doğru yerdesin.</em></h1>
+  <h1>En ucuza kahveyi arıyorsan<br><em>doğru yerdesin!</em></h1>
   <p class="sub">Konumunu paylaş ya da bir semt seç — çevrendeki kahvecileri fiyatı en ucuzdan en pahalıya otomatik sıralayalım. Fiyat seviyeleri Google Places'ten çekiliyor; olmayan yerleri sen de işaretleyebilirsin.</p>
 
   <div class="controls">
@@ -409,13 +434,15 @@
 
   <div class="chips" id="chips">
     <span class="chip-label">hızlı semtler:</span>
-    <button class="chip" data-semt="Kadıköy, İstanbul">Kadıköy</button>
-    <button class="chip" data-semt="Beşiktaş, İstanbul">Beşiktaş</button>
-    <button class="chip" data-semt="Beyoğlu, İstanbul">Beyoğlu</button>
-    <button class="chip" data-semt="Şişli, İstanbul">Şişli</button>
-    <button class="chip" data-semt="Üsküdar, İstanbul">Üsküdar</button>
-    <button class="chip" data-semt="Bakırköy, İstanbul">Bakırköy</button>
+    <button class="chip chip-district" data-district="Kadıköy">Kadıköy</button>
+    <button class="chip chip-district" data-district="Beşiktaş">Beşiktaş</button>
+    <button class="chip chip-district" data-district="Beyoğlu">Beyoğlu</button>
+    <button class="chip chip-district" data-district="Şişli">Şişli</button>
+    <button class="chip chip-district" data-district="Üsküdar">Üsküdar</button>
+    <button class="chip chip-district" data-district="Bakırköy">Bakırköy</button>
   </div>
+
+  <div class="subchips" id="subchips" style="display:none"></div>
 
   <div class="status-line" id="statusLine"></div>
 </div>
@@ -470,14 +497,66 @@ let priceMarks = {}; // id -> 1|2|3
 let currentRadius = 1500;
 let lastSearch = null; // {lat, lon, label}
 
-const ISTANBUL_SEMT = {
-  'Kadıköy, İstanbul':  [40.9905, 29.0234],
-  'Beşiktaş, İstanbul': [41.0430, 29.0089],
-  'Beyoğlu, İstanbul':  [41.0370, 28.9850],
-  'Şişli, İstanbul':    [41.0602, 28.9877],
-  'Üsküdar, İstanbul':  [41.0226, 29.0244],
-  'Bakırköy, İstanbul': [40.9819, 28.8772]
+const ISTANBUL_DISTRICTS = {
+  'Kadıköy': {
+    center: [40.9905, 29.0234],
+    spots: {
+      'Rıhtım / Boğa': [40.9925, 29.0244],
+      'Moda':          [40.9836, 29.0281],
+      'Bahariye':      [40.9895, 29.0275],
+      'Yeldeğirmeni':  [41.0004, 29.0294]
+    }
+  },
+  'Beşiktaş': {
+    center: [41.0430, 29.0089],
+    spots: {
+      'Ortaköy': [41.0553, 29.0271],
+      'Levent':  [41.0815, 29.0113],
+      'Etiler':  [41.0783, 29.0339]
+    }
+  },
+  'Beyoğlu': {
+    center: [41.0370, 28.9850],
+    spots: {
+      'Karaköy':   [41.0256, 28.9744],
+      'Cihangir':  [41.0316, 28.9836],
+      'Galata':    [41.0256, 28.9761],
+      'Taksim':    [41.0370, 28.9857]
+    }
+  },
+  'Şişli': {
+    center: [41.0602, 28.9877],
+    spots: {
+      'Nişantaşı':   [41.0476, 28.9939],
+      'Mecidiyeköy': [41.0670, 28.9950],
+      'Bomonti':     [41.0568, 28.9789]
+    }
+  },
+  'Üsküdar': {
+    center: [41.0226, 29.0244],
+    spots: {
+      'Kuzguncuk':   [41.0322, 29.0311],
+      'Çengelköy':   [41.0508, 29.0559],
+      'Beylerbeyi':  [41.0428, 29.0447]
+    }
+  },
+  'Bakırköy': {
+    center: [40.9819, 28.8772],
+    spots: {
+      'Ataköy':   [40.9776, 28.8460],
+      'Yeşilköy': [40.9647, 28.8250]
+    }
+  }
 };
+
+// Serbest metin aramasında da çalışsın diye düz bir arama tablosu üretiyoruz
+const ISTANBUL_SEMT = {};
+Object.entries(ISTANBUL_DISTRICTS).forEach(([district, info]) => {
+  ISTANBUL_SEMT[`${district}, İstanbul`] = info.center;
+  Object.entries(info.spots).forEach(([spot, coords]) => {
+    ISTANBUL_SEMT[`${spot}, ${district}`] = coords;
+  });
+});
 
 function haversine(lat1, lon1, lat2, lon2){
   const R = 6371000;
@@ -740,24 +819,53 @@ document.getElementById('clearMarksBtn').addEventListener('click', () => {
   render();
 });
 
-document.querySelectorAll('.chip').forEach(chip => {
+const subchipsEl = document.getElementById('subchips');
+
+function renderSubchips(district){
+  const info = ISTANBUL_DISTRICTS[district];
+  if(!info || !info.spots || !Object.keys(info.spots).length){
+    subchipsEl.style.display = 'none';
+    subchipsEl.innerHTML = '';
+    return;
+  }
+  subchipsEl.innerHTML = '<span class="chip-label">önemli yerler:</span>' +
+    Object.keys(info.spots).map(spot =>
+      `<button class="chip-sub" data-district="${district}" data-spot="${spot}">${spot}</button>`
+    ).join('');
+  subchipsEl.style.display = 'flex';
+
+  subchipsEl.querySelectorAll('.chip-sub').forEach(btn => {
+    btn.addEventListener('click', () => {
+      subchipsEl.querySelectorAll('.chip-sub').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const d = btn.dataset.district;
+      const spot = btn.dataset.spot;
+      const coords = ISTANBUL_DISTRICTS[d].spots[spot];
+      const label = `${spot}, ${d}`;
+      document.getElementById('cityInput').value = label;
+      loadAround(coords[0], coords[1], label);
+    });
+  });
+}
+
+document.querySelectorAll('.chip-district').forEach(chip => {
   chip.addEventListener('click', () => {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.chip-district').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
-    const semt = chip.dataset.semt;
-    document.getElementById('cityInput').value = semt;
-    const coords = ISTANBUL_SEMT[semt];
-    if(coords){
-      loadAround(coords[0], coords[1], semt);
-    }else{
-      doCitySearch();
-    }
+    const district = chip.dataset.district;
+    const info = ISTANBUL_DISTRICTS[district];
+    const label = `${district}, İstanbul`;
+    document.getElementById('cityInput').value = label;
+    loadAround(info.center[0], info.center[1], label);
+    renderSubchips(district);
   });
 });
 
 // İstanbul için varsayılan başlangıç: Beyoğlu çevresi
 window.addEventListener('DOMContentLoaded', () => {
   loadAround(41.0370, 28.9850, 'Beyoğlu, İstanbul');
+  document.querySelector('.chip-district[data-district="Beyoğlu"]')?.classList.add('active');
+  renderSubchips('Beyoğlu');
 });
 </script>
 
