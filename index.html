@@ -350,6 +350,127 @@
     white-space:nowrap;
   }
   .directions-link:hover{text-decoration:underline;}
+
+  .feedback-link{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    cursor:pointer;
+    white-space:nowrap;
+    padding:0;
+  }
+  .feedback-link:hover{color:var(--rust);}
+
+  .feedback-toggle{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:var(--crema);
+    color:var(--espresso-deep);
+    border:none;
+    padding:12px 18px;
+    border-radius:999px;
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 10px 30px -8px rgba(0,0,0,.7);
+    z-index:50;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .feedback-toggle:hover{background:var(--crema-bright); transform:translateY(-1px);}
+
+  .feedback-panel{
+    position:fixed;
+    bottom:0;
+    right:20px;
+    width:320px;
+    max-width:calc(100vw - 40px);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:8px 8px 0 0;
+    box-shadow:0 -14px 40px -12px rgba(0,0,0,.7);
+    transform:translateY(115%);
+    transition:transform .25s ease;
+    z-index:60;
+    padding:18px 18px 20px;
+  }
+  .feedback-panel.open{transform:translateY(0);}
+  .feedback-panel h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    margin:0 0 4px;
+  }
+  .feedback-panel .hint{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+    line-height:1.4;
+  }
+  .feedback-panel label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--ink-soft);
+    margin:10px 0 4px;
+  }
+  .feedback-panel input, .feedback-panel textarea{
+    width:100%;
+    border:1px solid #b8ab8c;
+    border-radius:4px;
+    padding:8px 10px;
+    font-family:'Work Sans', sans-serif;
+    font-size:13px;
+    background:#fff;
+    color:var(--ink);
+    box-sizing:border-box;
+  }
+  .feedback-panel textarea{resize:vertical; min-height:70px;}
+  .feedback-actions{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+    align-items:center;
+  }
+  .feedback-submit{
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:4px;
+    font-weight:600;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .feedback-submit:hover{opacity:.9;}
+  .feedback-close-link{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:12px;
+    text-decoration:underline;
+  }
+  .feedback-status{
+    margin-top:8px;
+    font-size:12px;
+    font-family:'IBM Plex Mono', monospace;
+    min-height:14px;
+  }
+  .feedback-status.ok{color:var(--pine);}
+  .feedback-status.err{color:var(--rust);}
+
+  @media (max-width:480px){
+    .feedback-panel{right:10px; left:10px; width:auto;}
+    .feedback-toggle{right:14px; bottom:14px; padding:10px 15px; font-size:13px;}
+  }
   .price-tag{
     display:flex;
     gap:4px;
@@ -483,6 +604,35 @@
 <footer class="note">
   Yer verileri Google Places'ten alınır. Fiyat seviyeleri (₺ / ₺₺ / ₺₺₺) bazı yerler için Google'dan otomatik gelir, gelmeyenler için sen işaretleyebilirsin. Yanlarındaki TL aralıkları belirli bir mekanın gerçek menü fiyatı değildir — orta boy filtre kahve için genel piyasa gözlemine dayanan kaba bir tahmindir, zam ve şubeye göre değişebilir.
 </footer>
+
+<!-- Netlify'ın build sırasında algılaması için statik form tanımı — görünmez, gerçek gönderim JS ile yapılıyor -->
+<form name="fiyat-bildirim" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="hidden" name="form-name" value="fiyat-bildirim" />
+  <input type="text" name="cafe" />
+  <input type="text" name="mesaj" />
+  <input type="email" name="email" />
+  <input type="text" name="bot-field" />
+</form>
+
+<button class="feedback-toggle" id="feedbackToggle">💬 Fiyat bildir</button>
+
+<div class="feedback-panel" id="feedbackPanel">
+  <h3>Fiyat bilgisi gönder</h3>
+  <p class="hint">Bir yerin fiyatı yanlış görünüyorsa ya da fiyat bilgisi eksikse, buradan bize yazabilirsin. Gönderdiklerin sitenin fiyat verilerini iyileştirmek için kullanılır.</p>
+  <form id="feedbackForm">
+    <label for="feedbackCafe">Mekan adı (varsa)</label>
+    <input type="text" id="feedbackCafe" placeholder="örn. Moda Kahve">
+    <label for="feedbackMsg">Mesajın</label>
+    <textarea id="feedbackMsg" placeholder="örn. Orta boy filtre kahve şu an 95 TL, listede ₺ görünüyordu ama ₺₺ olmalı."></textarea>
+    <label for="feedbackEmail">E-posta (opsiyonel)</label>
+    <input type="email" id="feedbackEmail" placeholder="geri dönüş istersen">
+    <div class="feedback-actions">
+      <button type="submit" class="feedback-submit">Gönder</button>
+      <button type="button" class="feedback-close-link" id="feedbackClose">Kapat</button>
+    </div>
+    <div class="feedback-status" id="feedbackStatus"></div>
+  </form>
+</div>
 
 <script>
 const listArea = document.getElementById('listArea');
@@ -706,6 +856,7 @@ function render(){
           <div class="price-tag">${priceBtns}</div>
           ${rangeText}
           <a class="directions-link" href="${mapsUrl}" target="_blank" rel="noopener">yol tarifi →</a>
+          <button class="feedback-link" data-cafe="${escapeHtml(c.name)}">fiyat bildir</button>
         </div>
       </div>`;
   }).join('');
@@ -718,6 +869,10 @@ function render(){
       if(priceMarks[id] === 0) delete priceMarks[id];
       render();
     });
+  });
+
+  listArea.querySelectorAll('.feedback-link').forEach(btn => {
+    btn.addEventListener('click', () => openFeedback(btn.dataset.cafe));
   });
 }
 
@@ -866,6 +1021,70 @@ window.addEventListener('DOMContentLoaded', () => {
   loadAround(41.0370, 28.9850, 'Beyoğlu, İstanbul');
   document.querySelector('.chip-district[data-district="Beyoğlu"]')?.classList.add('active');
   renderSubchips('Beyoğlu');
+});
+
+// ---------- Geri bildirim paneli ----------
+const feedbackToggle = document.getElementById('feedbackToggle');
+const feedbackPanel = document.getElementById('feedbackPanel');
+const feedbackCafeInput = document.getElementById('feedbackCafe');
+const feedbackMsgInput = document.getElementById('feedbackMsg');
+const feedbackEmailInput = document.getElementById('feedbackEmail');
+const feedbackStatus = document.getElementById('feedbackStatus');
+
+function openFeedback(cafeName){
+  feedbackPanel.classList.add('open');
+  feedbackCafeInput.value = cafeName || '';
+  feedbackStatus.textContent = '';
+  feedbackStatus.className = 'feedback-status';
+  feedbackMsgInput.focus();
+}
+
+feedbackToggle.addEventListener('click', () => {
+  if(feedbackPanel.classList.contains('open')){
+    feedbackPanel.classList.remove('open');
+  }else{
+    openFeedback('');
+  }
+});
+
+document.getElementById('feedbackClose').addEventListener('click', () => {
+  feedbackPanel.classList.remove('open');
+});
+
+document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const cafe = feedbackCafeInput.value.trim();
+  const mesaj = feedbackMsgInput.value.trim();
+  const email = feedbackEmailInput.value.trim();
+
+  if(!mesaj){
+    feedbackStatus.textContent = 'Lütfen bir mesaj yaz.';
+    feedbackStatus.className = 'feedback-status err';
+    return;
+  }
+
+  feedbackStatus.textContent = 'Gönderiliyor…';
+  feedbackStatus.className = 'feedback-status';
+
+  try{
+    const body = new URLSearchParams({ 'form-name': 'fiyat-bildirim', cafe, mesaj, email }).toString();
+    const res = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    if(!res.ok) throw new Error('http-' + res.status);
+
+    feedbackStatus.textContent = 'Teşekkürler! Geri bildirimin iletildi. 🙏';
+    feedbackStatus.className = 'feedback-status ok';
+    feedbackMsgInput.value = '';
+    feedbackEmailInput.value = '';
+    setTimeout(() => { feedbackPanel.classList.remove('open'); }, 1800);
+  }catch(err){
+    console.error('Feedback submit failed:', err);
+    feedbackStatus.textContent = 'Gönderilemedi, birazdan tekrar dener misin?';
+    feedbackStatus.className = 'feedback-status err';
+  }
 });
 </script>
 
