@@ -346,6 +346,12 @@
     color:var(--espresso-deep);
     font-weight:600;
   }
+  .price-range{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
   .receipt-footer{
     text-align:center;
     font-family:'IBM Plex Mono', monospace;
@@ -448,7 +454,7 @@
 </div>
 
 <footer class="note">
-  Yer verileri Google Places'ten (kendi API anahtarınla) alınır. Fiyat seviyeleri (₺ / ₺₺ / ₺₺₺) bazı yerler için Google'dan otomatik gelir, gelmeyenler için senin işaretlemenle bu oturumda saklanır.
+  Yer verileri Google Places'ten alınır. Fiyat seviyeleri (₺ / ₺₺ / ₺₺₺) bazı yerler için Google'dan otomatik gelir, gelmeyenler için sen işaretleyebilirsin. Yanlarındaki TL aralıkları belirli bir mekanın gerçek menü fiyatı değildir — orta boy filtre kahve için genel piyasa gözlemine dayanan kaba bir tahmindir, zam ve şubeye göre değişebilir.
 </footer>
 
 <script>
@@ -530,6 +536,15 @@ const PRICE_LEVEL_MAP = {
   PRICE_LEVEL_VERY_EXPENSIVE: 3
 };
 
+// Orta boy filtre kahve için genel piyasa tahmini (TL) — belirli bir mekanın
+// gerçek menü fiyatı değil, seviyeye göre kaba bir aralık. Zam oranlarına
+// göre güncellenmesi gerekir.
+const TL_RANGES = {
+  1: { min: 50,  max: 90,  label: '₺' },
+  2: { min: 90,  max: 140, label: '₺₺' },
+  3: { min: 130, max: 190, label: '₺₺₺' }
+};
+
 async function fetchCafesGoogle(lat, lon, radius=currentRadius){
   let res;
   try{
@@ -592,6 +607,9 @@ function render(){
     const priceBtns = [1,2,3].map(lvl =>
       `<button data-id="${c.id}" data-lvl="${lvl}" class="${mark===lvl?'active':''}" aria-label="${lvl} seviyesi fiyat işaretle">${'₺'.repeat(lvl)}</button>`
     ).join('');
+    const rangeText = mark > 0
+      ? `<span class="price-range">~${TL_RANGES[mark].min}–${TL_RANGES[mark].max} TL</span>`
+      : '';
     let hoursBadge = '';
     if(c.openNow === true) hoursBadge = '<span class="badge badge-open">açık</span>';
     else if(c.openNow === false) hoursBadge = '<span class="badge badge-closed">kapalı</span>';
@@ -607,6 +625,7 @@ function render(){
         <div class="price-row">
           <label>fiyat seviyesi:</label>
           <div class="price-tag">${priceBtns}</div>
+          ${rangeText}
           <a class="directions-link" href="${mapsUrl}" target="_blank" rel="noopener">yol tarifi →</a>
         </div>
       </div>`;
