@@ -57,8 +57,8 @@
     letter-spacing:-.01em;
   }
   h1 em{
-    font-style:italic;
-    font-weight:400;
+    font-style:normal;
+    font-weight:900;
     color:var(--crema-bright);
   }
   .sub{
@@ -389,8 +389,8 @@
 
 <div class="hero">
   <div class="eyebrow">istanbul'da yakınında ne var</div>
-  <h1>En yakın <em>fincan</em>ı<br>bul, fiyatı sen etiketle.</h1>
-  <p class="sub">Konumunu paylaş ya da bir semt seç, çevrendeki kahvecileri mesafeye göre sıralayalım. Fiyat bilgisi genel veritabanlarında yok — gördüğün yerleri kendi bildiğin fiyat seviyesiyle işaretleyip listeyi ona göre de sıralayabilirsin.</p>
+  <h1>Ucuza kahve arıyorsan<br><em>doğru yerdesin.</em></h1>
+  <p class="sub">Konumunu paylaş ya da bir semt seç — çevrendeki kahvecileri fiyatı en ucuzdan en pahalıya otomatik sıralayalım. Fiyat seviyeleri Google Places'ten çekiliyor; olmayan yerleri sen de işaretleyebilirsin.</p>
 
   <div class="controls">
     <button class="btn-primary" id="geoBtn">📍 Konumumu kullan</button>
@@ -427,8 +427,8 @@
     </select>
     <span class="label">Sırala:</span>
     <select id="sortSelect">
+      <option value="price" selected>Fiyat (ucuzdan)</option>
       <option value="dist">Mesafe (yakından)</option>
-      <option value="price">Fiyat (ucuzdan) — işaretlenenler önce</option>
       <option value="name">İsim (A-Z)</option>
     </select>
     <button class="btn-link" id="clearMarksBtn">fiyat işaretlerini temizle</button>
